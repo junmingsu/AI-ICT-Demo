@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認知能力訓練</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-container {
+            background-color: #fff;
+            border: 3px solid #000;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 開始畫面 */
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .start-screen h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .start-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-button:hover {
+            background-color: #45a049;
+        }
+
+        .settings-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .settings-button:hover {
+            background-color: #1976D2;
+        }
+
+        /* 設定畫面 */
+        .settings-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .settings-screen h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .rounds-setting {
+            background-color: #f5f5f5;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .rounds-setting label {
+            font-size: 18px;
+            color: #333;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .rounds-input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .adjust-button {
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .adjust-button:hover {
+            background-color: #ccc;
+        }
+
+        .adjust-button:active {
+            transform: scale(0.95);
+        }
+
+        #roundsInput {
+            width: 80px;
+            height: 40px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+        }
+
+        .rounds-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .settings-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .confirm-button, .cancel-button {
+            padding: 10px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .confirm-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background-color: #da190b;
+        }
+
+        /* 遊戲畫面 */
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .timer-section {
+            background-color: #ffe4c4;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .blocks-section {
+            background-color: #ffe4c4;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            min-height: 80px;
+            border-bottom: 2px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+        .direction-block {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            background-color: #fff;
+            border: 2px solid #333;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .direction-block.correct {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .direction-block.wrong {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .buttons-section {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-content: center;
+        }
+
+        .action-button {
+            background-color: #ffe4c4;
+            border: 2px solid #ccc;
+            border-radius: 15px;
+            font-size: 48px;
+            color: #666;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+            background-color: #ffd4a4;
+        }
+
+        .action-button.correct-flash {
+            animation: correctFlash 0.5s;
+        }
+
+        .action-button.wrong-flash {
+            animation: wrongFlash 0.5s;
+        }
+
+        @keyframes correctFlash {
+            0%, 100% { background-color: #ffe4c4; }
+            50% { background-color: #90EE90; }
+        }
+
+        @keyframes wrongFlash {
+            0%, 100% { background-color: #ffe4c4; }
+            50% { background-color: #ffcccb; }
+        }
+
+        /* 結果畫面 */
+        .result-screen {
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .result-screen h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .chart-container {
+            flex: 1;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 60px;
+            background-color: #4CAF50;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
+            position: relative;
+            transition: height 0.5s;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .result-button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .play-again {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .play-again:hover {
+            background-color: #45a049;
+        }
+
+        .exit {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .exit:hover {
+            background-color: #da190b;
+        }
+
+        .rounds-completed {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rounds-completed span {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 400px) {
+            .app-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+                border: none;
+            }
+
+            .direction-block {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            .action-button {
+                font-size: 36px;
+                min-height: 60px;
+            }
+
+            .blocks-section {
+                padding: 15px 8px;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 開始畫面 -->
+        <div class="start-screen" id="startScreen">
+            <h1>認知能力訓練</h1>
+            <button class="start-button" onclick="startGame()">開始訓練</button>
+            <button class="settings-button" onclick="showSettings()">⚙️ 設定關卡次數</button>
+        </div>
+
+        <!-- 設定畫面 -->
+        <div class="settings-screen" id="settingsScreen">
+            <h2>設定關卡次數</h2>
+            <div class="rounds-setting">
+                <label for="roundsInput">關卡次數：</label>
+                <div class="rounds-input-group">
+                    <button class="adjust-button" onclick="adjustRounds(-1)">−</button>
+                    <input type="number" id="roundsInput" value="3" min="1" max="10" readonly>
+                    <button class="adjust-button" onclick="adjustRounds(1)">+</button>
+                </div>
+                <div class="rounds-info">（最少1次，最多10次）</div>
+            </div>
+            <div class="settings-buttons">
+                <button class="confirm-button" onclick="confirmSettings()">確定</button>
+                <button class="cancel-button" onclick="cancelSettings()">取消</button>
+            </div>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div class="game-screen" id="gameScreen">
+            <div class="timer-section">
+                Time: <span id="timer">0</span>s
+            </div>
+            <div class="blocks-section" id="blocksSection">
+                <!-- 方向方塊會動態生成 -->
+            </div>
+            <div class="buttons-section" id="buttonsSection">
+                <!-- 按鈕會動態生成 -->
+            </div>
+        </div>
+
+        <!-- 結果畫面 -->
+        <div class="result-screen" id="resultScreen">
+            <h2>訓練完成！</h2>
+            <div class="rounds-completed">完成 <span id="completedRounds"></span> 個關卡</div>
+            <div class="chart-container" id="chartContainer">
+                <!-- 長條圖會動態生成 -->
+            </div>
+            <div class="result-buttons">
+                <button class="result-button play-again" onclick="playAgain()">再玩一次</button>
+                <button class="result-button exit" onclick="exitToStart()">結束</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲狀態
+        let gameState = {
+            currentRound: 0,
+            totalRounds: 3,
+            currentSequence: [],
+            playerProgress: 0,
+            startTime: 0,
+            roundTimes: [],
+            timerInterval: null
+        };
+
+        // 顯示設定畫面
+        function showSettings() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('settingsScreen').style.display = 'flex';
+            document.getElementById('roundsInput').value = gameState.totalRounds;
+        }
+
+        // 調整關卡次數
+        function adjustRounds(change) {
+            const input = document.getElementById('roundsInput');
+            const currentValue = parseInt(input.value);
+            const newValue = currentValue + change;
+            
+            if (newValue >= 1 && newValue <= 10) {
+                input.value = newValue;
+            }
+        }
+
+        // 確認設定
+        function confirmSettings() {
+            const rounds = parseInt(document.getElementById('roundsInput').value);
+            gameState.totalRounds = rounds;
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+
+        // 取消設定
+        function cancelSettings() {
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+
+        // 方向圖示
+        const directionIcons = {
+            up: '↑',
+            down: '↓',
+            left: '←',
+            right: '→',
+            clockwise: '↻',
+            counterclockwise: '↺'
+        };
+
+        // 開始遊戲
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            gameState.currentRound = 0;
+            gameState.roundTimes = [];
+            nextRound();
+        }
+
+        // 下一關
+        function nextRound() {
+            if (gameState.currentRound >= gameState.totalRounds) {
+                showResults();
+                return;
+            }
+
+            gameState.currentRound++;
+            gameState.playerProgress = 0;
+            gameState.currentSequence = generateSequence();
+            
+            displayBlocks();
+            displayButtons();
+            startTimer();
+        }
+
+        // 生成隨機序列
+        function generateSequence() {
+            const blockCount = Math.floor(Math.random() * 4) + 1; // 1-4個方塊
+            const sequence = [];
+            const directions = ['LEFT', 'RIGHT', 'UP', 'DOWN', '左', '右', '上', '下'];
+            
+            for (let i = 0; i < blockCount; i++) {
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                let direction;
+                if (randomDirection === 'LEFT' || randomDirection === '左') {
+                    direction = 'left';
+                } else if (randomDirection === 'RIGHT' || randomDirection === '右') {
+                    direction = 'right';
+                } else if (randomDirection === 'UP' || randomDirection === '上') {
+                    direction = 'up';
+                } else if (randomDirection === 'DOWN' || randomDirection === '下') {
+                    direction = 'down';
+                }
+                
+                sequence.push({
+                    text: randomDirection,
+                    direction: direction
+                });
+            }
+            
+            return sequence;
+        }
+
+        // 顯示方塊
+        function displayBlocks() {
+            const blocksSection = document.getElementById('blocksSection');
+            blocksSection.innerHTML = '';
+            
+            gameState.currentSequence.forEach((item, index) => {
+                const block = document.createElement('div');
+                block.className = 'direction-block';
+                block.textContent = item.text;
+                block.id = `block-${index}`;
+                blocksSection.appendChild(block);
+            });
+        }
+
+        // 顯示按鈕
+        function displayButtons() {
+            const buttonsSection = document.getElementById('buttonsSection');
+            buttonsSection.innerHTML = '';
+            
+            // 隨機選擇6個圖示（包含必要的方向）
+            const allIcons = Object.keys(directionIcons);
+            const requiredDirections = ['left', 'right', 'up', 'down'];
+            const selectedIcons = [...requiredDirections];
+            
+            // 添加其他隨機圖示
+            while (selectedIcons.length < 6) {
+                const randomIcon = allIcons[Math.floor(Math.random() * allIcons.length)];
+                if (!selectedIcons.includes(randomIcon)) {
+                    selectedIcons.push(randomIcon);
+                }
+            }
+            
+            // 打亂順序
+            selectedIcons.sort(() => Math.random() - 0.5);
+            
+            // 創建按鈕
+            selectedIcons.forEach(iconKey => {
+                const button = document.createElement('button');
+                button.className = 'action-button';
+                button.innerHTML = directionIcons[iconKey];
+                button.dataset.direction = iconKey;
+                button.onclick = () => checkAnswer(iconKey);
+                buttonsSection.appendChild(button);
+            });
+        }
+
+        // 開始計時
+        function startTimer() {
+            gameState.startTime = Date.now();
+            updateTimer();
+            gameState.timerInterval = setInterval(updateTimer, 100);
+        }
+
+        // 更新計時器
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            document.getElementById('timer').textContent = elapsed;
+        }
+
+        // 停止計時
+        function stopTimer() {
+            clearInterval(gameState.timerInterval);
+        }
+
+        // 檢查答案
+        function checkAnswer(direction) {
+            const currentItem = gameState.currentSequence[gameState.playerProgress];
+            const button = event.target;
+            
+            if (direction === currentItem.direction) {
+                // 正確
+                const block = document.getElementById(`block-${gameState.playerProgress}`);
+                block.classList.add('correct');
+                button.classList.add('correct-flash');
+                setTimeout(() => button.classList.remove('correct-flash'), 500);
+                
+                gameState.playerProgress++;
+                
+                if (gameState.playerProgress === gameState.currentSequence.length) {
+                    // 完成當前關卡
+                    stopTimer();
+                    const completionTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+                    gameState.roundTimes.push(completionTime);
+                    
+                    setTimeout(() => {
+                        nextRound();
+                    }, 1000);
+                }
+            } else {
+                // 錯誤
+                button.classList.add('wrong-flash');
+                setTimeout(() => button.classList.remove('wrong-flash'), 500);
+                
+                // 重置所有方塊
+                for (let i = 0; i < gameState.currentSequence.length; i++) {
+                    const block = document.getElementById(`block-${i}`);
+                    block.classList.remove('correct');
+                    block.classList.add('wrong');
+                    setTimeout(() => {
+                        block.classList.remove('wrong');
+                    }, 500);
+                }
+                
+                // 重新開始當前關卡
+                gameState.playerProgress = 0;
+            }
+        }
+
+        // 顯示結果
+        function showResults() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'flex';
+            
+            // 顯示完成的關卡數
+            document.getElementById('completedRounds').textContent = gameState.roundTimes.length;
+            
+            // 繪製長條圖
+            const chartContainer = document.getElementById('chartContainer');
+            chartContainer.innerHTML = '';
+            
+            const maxTime = Math.max(...gameState.roundTimes);
+            
+            gameState.roundTimes.forEach((time, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const height = (time / maxTime) * 200;
+                bar.style.height = `${height}px`;
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = `第${index + 1}關`;
+                bar.appendChild(label);
+                
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = `${time}s`;
+                bar.appendChild(value);
+                
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        // 再玩一次
+        function playAgain() {
+            document.getElementById('resultScreen').style.display = 'none';
+            startGame();
+        }
+
+        // 返回開始畫面
+        function exitToStart() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

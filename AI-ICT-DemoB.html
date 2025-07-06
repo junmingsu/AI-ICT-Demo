@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認知能力訓練 - 像素人物版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .app-container {
+            background-color: #fff;
+            border: 3px solid #000;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* 開始畫面 */
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .start-screen h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #333;
+        }
+
+        .start-button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .start-button:hover {
+            background-color: #45a049;
+        }
+
+        .settings-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .settings-button:hover {
+            background-color: #1976D2;
+        }
+
+        /* 設定畫面 */
+        .settings-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .settings-screen h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .rounds-setting {
+            background-color: #f5f5f5;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .rounds-setting label {
+            font-size: 18px;
+            color: #333;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .rounds-input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .adjust-button {
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .adjust-button:hover {
+            background-color: #ccc;
+        }
+
+        .adjust-button:active {
+            transform: scale(0.95);
+        }
+
+        #roundsInput {
+            width: 80px;
+            height: 40px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background-color: white;
+        }
+
+        .rounds-info {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .settings-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .confirm-button, .cancel-button {
+            padding: 10px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .confirm-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background-color: #45a049;
+        }
+
+        .cancel-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .cancel-button:hover {
+            background-color: #da190b;
+        }
+
+        /* 遊戲畫面 */
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .timer-section {
+            background-color: #ffe4c4;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .timer-display {
+            background-color: #333;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #ff9800;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .blocks-section {
+            background-color: #ffe4c4;
+            padding: 20px 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            min-height: 100px;
+            border-bottom: 2px solid #ddd;
+            align-items: center;
+        }
+
+        .arrow-block {
+            width: 80px;
+            height: 80px;
+            background-color: #4a90e2;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: white;
+            border: 3px solid #2c5aa0;
+            transition: all 0.3s;
+        }
+
+        .arrow-block.correct {
+            background-color: #4CAF50;
+            border-color: #2e7d32;
+        }
+
+        .arrow-block.wrong {
+            background-color: #f44336;
+            border-color: #c62828;
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .characters-section {
+            flex: 1;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            align-content: center;
+            background-color: white;
+        }
+
+        .character-button {
+            background-color: #f5f5f5;
+            border: 3px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+            transition: all 0.2s;
+            position: relative;
+            padding: 10px;
+        }
+
+        .character-button:hover {
+            background-color: #e8e8e8;
+            transform: translateY(-2px);
+        }
+
+        .character-button:active {
+            transform: scale(0.95);
+        }
+
+        .character-button.selected {
+            border-color: #f44336;
+            background-color: #ffe8e8;
+        }
+
+        .character-button.correct-flash {
+            animation: correctFlash 0.5s;
+        }
+
+        .character-button.wrong-flash {
+            animation: wrongFlash 0.5s;
+        }
+
+        @keyframes correctFlash {
+            0%, 100% { background-color: #f5f5f5; }
+            50% { background-color: #90EE90; }
+        }
+
+        @keyframes wrongFlash {
+            0%, 100% { background-color: #f5f5f5; }
+            50% { background-color: #ffcccb; }
+        }
+
+        /* 像素人物樣式 */
+        .pixel-character {
+            width: 60px;
+            height: 80px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 基礎人物身體 */
+        .character-base {
+            width: 50px;
+            height: 70px;
+            position: relative;
+        }
+
+        /* 頭部 */
+        .character-base .head {
+            width: 30px;
+            height: 30px;
+            background-color: #8B4513;
+            border-radius: 8px 8px 5px 5px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+        }
+
+        .character-base .face {
+            width: 26px;
+            height: 20px;
+            background-color: #FDBCB4;
+            position: absolute;
+            bottom: 0;
+            left: 2px;
+            border-radius: 0 0 5px 5px;
+        }
+
+        /* 身體 */
+        .character-base .body {
+            width: 35px;
+            height: 25px;
+            background-color: #FF6B35;
+            border-radius: 5px;
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* 手臂 - 預設位置 */
+        .character-base .arm {
+            width: 10px;
+            height: 20px;
+            background-color: #FDBCB4;
+            position: absolute;
+            top: 30px;
+            border-radius: 5px;
+        }
+
+        .character-base .arm.left {
+            left: 3px;
+        }
+
+        .character-base .arm.right {
+            right: 3px;
+        }
+
+        /* 腿部 */
+        .character-base .legs {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .character-base .leg {
+            width: 12px;
+            height: 18px;
+            background-color: #4169E1;
+            position: absolute;
+            border-radius: 0 0 5px 5px;
+        }
+
+        .character-base .leg.left {
+            left: 10px;
+        }
+
+        .character-base .leg.right {
+            right: 10px;
+        }
+
+        /* 朝右的人物 */
+        .pixel-character.facing-right .head {
+            transform: translateX(-50%) rotate(0deg);
+        }
+
+        .pixel-character.facing-right .face {
+            left: 10px;
+        }
+
+        .pixel-character.facing-right .face::before,
+        .pixel-character.facing-right .face::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: #000;
+            border-radius: 50%;
+            top: 8px;
+        }
+
+        .pixel-character.facing-right .face::before {
+            right: 5px;
+        }
+
+        .pixel-character.facing-right .face::after {
+            right: 12px;
+        }
+
+        .pixel-character.facing-right .arm.right {
+            transform: rotate(-45deg);
+            transform-origin: top center;
+        }
+
+        /* 朝左的人物 */
+        .pixel-character.facing-left .face {
+            left: -6px;
+        }
+
+        .pixel-character.facing-left .face::before,
+        .pixel-character.facing-left .face::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: #000;
+            border-radius: 50%;
+            top: 8px;
+        }
+
+        .pixel-character.facing-left .face::before {
+            left: 5px;
+        }
+
+        .pixel-character.facing-left .face::after {
+            left: 12px;
+        }
+
+        .pixel-character.facing-left .arm.left {
+            transform: rotate(45deg);
+            transform-origin: top center;
+        }
+
+        /* 朝上的人物（背對） */
+        .pixel-character.facing-up .face {
+            display: none;
+        }
+
+        .pixel-character.facing-up .head {
+            background-color: #6B3410;
+        }
+
+        .pixel-character.facing-up .head::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            background-color: #8B4513;
+            bottom: 0;
+        }
+
+        .pixel-character.facing-up .arm.left {
+            transform: rotate(15deg);
+        }
+
+        .pixel-character.facing-up .arm.right {
+            transform: rotate(-15deg);
+        }
+
+        /* 朝下的人物（正面） */
+        .pixel-character.facing-down .face {
+            width: 26px;
+            height: 22px;
+            left: 2px;
+        }
+
+        .pixel-character.facing-down .face::before,
+        .pixel-character.facing-down .face::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #000;
+            border-radius: 50%;
+            top: 8px;
+        }
+
+        .pixel-character.facing-down .face::before {
+            left: 6px;
+        }
+
+        .pixel-character.facing-down .face::after {
+            right: 6px;
+        }
+
+        /* 嘴巴 */
+        .pixel-character.facing-down .face::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 2px;
+            background-color: #000;
+            border-radius: 0;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pixel-character.facing-down .arm.left {
+            transform: rotate(-10deg);
+        }
+
+        .pixel-character.facing-down .arm.right {
+            transform: rotate(10deg);
+        }
+
+        /* 新增方向指示箭頭 */
+        .pixel-character::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            opacity: 0.3;
+        }
+
+        .pixel-character.facing-right::after {
+            border-left: 8px solid #333;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .pixel-character.facing-left::after {
+            border-right: 8px solid #333;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .pixel-character.facing-up::after {
+            border-bottom: 8px solid #333;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pixel-character.facing-down::after {
+            border-top: 8px solid #333;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* 結果畫面 */
+        .result-screen {
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .result-screen h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .rounds-completed {
+            font-size: 18px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rounds-completed span {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .chart-container {
+            flex: 1;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 60px;
+            background-color: #4CAF50;
+            border-radius: 5px 5px 0 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding-bottom: 10px;
+            position: relative;
+            transition: height 0.5s;
+        }
+
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bar-value {
+            position: absolute;
+            top: -25px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .result-button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .play-again {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .play-again:hover {
+            background-color: #45a049;
+        }
+
+        .exit {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .exit:hover {
+            background-color: #da190b;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 400px) {
+            .app-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+                border: none;
+            }
+
+            .arrow-block {
+                width: 60px;
+                height: 60px;
+                font-size: 30px;
+            }
+
+            .pixel-character {
+                width: 50px;
+                height: 66px;
+            }
+
+            .pixel-character .head {
+                width: 25px;
+                height: 25px;
+            }
+
+            .pixel-character .body {
+                width: 33px;
+                height: 25px;
+            }
+
+            .character-button {
+                min-height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 開始畫面 -->
+        <div class="start-screen" id="startScreen">
+            <h1>認知能力訓練<br>像素人物版</h1>
+            <button class="start-button" onclick="startGame()">開始訓練</button>
+            <button class="settings-button" onclick="showSettings()">⚙️ 設定關卡次數</button>
+        </div>
+
+        <!-- 設定畫面 -->
+        <div class="settings-screen" id="settingsScreen">
+            <h2>設定關卡次數</h2>
+            <div class="rounds-setting">
+                <label for="roundsInput">關卡次數：</label>
+                <div class="rounds-input-group">
+                    <button class="adjust-button" onclick="adjustRounds(-1)">−</button>
+                    <input type="number" id="roundsInput" value="3" min="1" max="10" readonly>
+                    <button class="adjust-button" onclick="adjustRounds(1)">+</button>
+                </div>
+                <div class="rounds-info">（最少1次，最多10次）</div>
+            </div>
+            <div class="settings-buttons">
+                <button class="confirm-button" onclick="confirmSettings()">確定</button>
+                <button class="cancel-button" onclick="cancelSettings()">取消</button>
+            </div>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div class="game-screen" id="gameScreen">
+            <div class="timer-section">
+                <div class="timer-display"><span id="timer">0</span>s</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+            <div class="blocks-section" id="blocksSection">
+                <!-- 箭頭方塊會動態生成 -->
+            </div>
+            <div class="characters-section" id="charactersSection">
+                <!-- 人物按鈕會動態生成 -->
+            </div>
+        </div>
+
+        <!-- 結果畫面 -->
+        <div class="result-screen" id="resultScreen">
+            <h2>訓練完成！</h2>
+            <div class="rounds-completed">完成 <span id="completedRounds"></span> 個關卡</div>
+            <div class="chart-container" id="chartContainer">
+                <!-- 長條圖會動態生成 -->
+            </div>
+            <div class="result-buttons">
+                <button class="result-button play-again" onclick="playAgain()">再玩一次</button>
+                <button class="result-button exit" onclick="exitToStart()">結束</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲狀態
+        let gameState = {
+            currentRound: 0,
+            totalRounds: 3,
+            currentSequence: [],
+            playerProgress: 0,
+            startTime: 0,
+            roundTimes: [],
+            timerInterval: null
+        };
+
+        // 箭頭圖示
+        const arrowIcons = {
+            left: '←',
+            right: '→',
+            up: '↑',
+            down: '↓'
+        };
+
+        // 顯示設定畫面
+        function showSettings() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('settingsScreen').style.display = 'flex';
+            document.getElementById('roundsInput').value = gameState.totalRounds;
+        }
+
+        // 調整關卡次數
+        function adjustRounds(change) {
+            const input = document.getElementById('roundsInput');
+            const currentValue = parseInt(input.value);
+            const newValue = currentValue + change;
+            
+            if (newValue >= 1 && newValue <= 10) {
+                input.value = newValue;
+            }
+        }
+
+        // 確認設定
+        function confirmSettings() {
+            const rounds = parseInt(document.getElementById('roundsInput').value);
+            gameState.totalRounds = rounds;
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+
+        // 取消設定
+        function cancelSettings() {
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+
+        // 開始遊戲
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            gameState.currentRound = 0;
+            gameState.roundTimes = [];
+            nextRound();
+        }
+
+        // 下一關
+        function nextRound() {
+            if (gameState.currentRound >= gameState.totalRounds) {
+                showResults();
+                return;
+            }
+
+            gameState.currentRound++;
+            gameState.playerProgress = 0;
+            gameState.currentSequence = generateSequence();
+            
+            updateProgressBar();
+            displayArrows();
+            displayCharacters();
+            startTimer();
+        }
+
+        // 生成隨機序列
+        function generateSequence() {
+            const blockCount = Math.floor(Math.random() * 4) + 1; // 1-4個箭頭
+            const sequence = [];
+            const directions = ['left', 'right', 'up', 'down'];
+            
+            for (let i = 0; i < blockCount; i++) {
+                const randomDirection = directions[Math.floor(Math.random() * directions.length)];
+                sequence.push(randomDirection);
+            }
+            
+            return sequence;
+        }
+
+        // 顯示箭頭
+        function displayArrows() {
+            const blocksSection = document.getElementById('blocksSection');
+            blocksSection.innerHTML = '';
+            
+            gameState.currentSequence.forEach((direction, index) => {
+                const block = document.createElement('div');
+                block.className = 'arrow-block';
+                block.innerHTML = arrowIcons[direction];
+                block.id = `arrow-${index}`;
+                blocksSection.appendChild(block);
+            });
+        }
+
+        // 創建像素人物
+        function createPixelCharacter(direction) {
+            const character = document.createElement('div');
+            character.className = `pixel-character facing-${direction}`;
+            
+            const base = document.createElement('div');
+            base.className = 'character-base';
+            
+            // 頭部
+            const head = document.createElement('div');
+            head.className = 'head';
+            
+            const face = document.createElement('div');
+            face.className = 'face';
+            head.appendChild(face);
+            
+            // 身體
+            const body = document.createElement('div');
+            body.className = 'body';
+            
+            // 手臂
+            const leftArm = document.createElement('div');
+            leftArm.className = 'arm left';
+            
+            const rightArm = document.createElement('div');
+            rightArm.className = 'arm right';
+            
+            // 腿部
+            const legs = document.createElement('div');
+            legs.className = 'legs';
+            
+            const leftLeg = document.createElement('div');
+            leftLeg.className = 'leg left';
+            
+            const rightLeg = document.createElement('div');
+            rightLeg.className = 'leg right';
+            
+            legs.appendChild(leftLeg);
+            legs.appendChild(rightLeg);
+            
+            // 組合
+            base.appendChild(head);
+            base.appendChild(body);
+            base.appendChild(leftArm);
+            base.appendChild(rightArm);
+            base.appendChild(legs);
+            
+            character.appendChild(base);
+            
+            return character;
+        }
+
+        // 顯示人物按鈕
+        function displayCharacters() {
+            const charactersSection = document.getElementById('charactersSection');
+            charactersSection.innerHTML = '';
+            
+            // 所有可能的方向和動作
+            const allDirections = ['left', 'right', 'up', 'down'];
+            const extraPoses = ['left', 'right']; // 額外的姿勢
+            const characterDirections = [...allDirections, ...extraPoses];
+            
+            // 打亂順序
+            characterDirections.sort(() => Math.random() - 0.5);
+            
+            // 創建人物按鈕
+            characterDirections.forEach((direction, index) => {
+                const button = document.createElement('button');
+                button.className = 'character-button';
+                button.dataset.direction = direction;
+                button.onclick = () => checkAnswer(direction);
+                
+                const character = createPixelCharacter(direction);
+                button.appendChild(character);
+                
+                charactersSection.appendChild(button);
+            });
+        }
+
+        // 更新進度條
+        function updateProgressBar() {
+            const progress = ((gameState.currentRound - 1) / gameState.totalRounds) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+        }
+
+        // 開始計時
+        function startTimer() {
+            gameState.startTime = Date.now();
+            updateTimer();
+            gameState.timerInterval = setInterval(updateTimer, 100);
+        }
+
+        // 更新計時器
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            document.getElementById('timer').textContent = elapsed;
+        }
+
+        // 停止計時
+        function stopTimer() {
+            clearInterval(gameState.timerInterval);
+        }
+
+        // 檢查答案
+        function checkAnswer(direction) {
+            const currentDirection = gameState.currentSequence[gameState.playerProgress];
+            const button = event.currentTarget;
+            
+            if (direction === currentDirection) {
+                // 正確
+                const arrow = document.getElementById(`arrow-${gameState.playerProgress}`);
+                arrow.classList.add('correct');
+                button.classList.add('correct-flash');
+                setTimeout(() => button.classList.remove('correct-flash'), 500);
+                
+                gameState.playerProgress++;
+                
+                if (gameState.playerProgress === gameState.currentSequence.length) {
+                    // 完成當前關卡
+                    stopTimer();
+                    const completionTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+                    gameState.roundTimes.push(completionTime);
+                    
+                    setTimeout(() => {
+                        nextRound();
+                    }, 1000);
+                }
+            } else {
+                // 錯誤
+                button.classList.add('wrong-flash');
+                setTimeout(() => button.classList.remove('wrong-flash'), 500);
+                
+                // 重置所有箭頭
+                for (let i = 0; i < gameState.currentSequence.length; i++) {
+                    const arrow = document.getElementById(`arrow-${i}`);
+                    arrow.classList.remove('correct');
+                    arrow.classList.add('wrong');
+                }
+                
+                setTimeout(() => {
+                    for (let i = 0; i < gameState.currentSequence.length; i++) {
+                        const arrow = document.getElementById(`arrow-${i}`);
+                        arrow.classList.remove('wrong');
+                    }
+                }, 500);
+                
+                // 重新開始當前關卡
+                gameState.playerProgress = 0;
+            }
+        }
+
+        // 顯示結果
+        function showResults() {
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'flex';
+            
+            // 顯示完成的關卡數
+            document.getElementById('completedRounds').textContent = gameState.roundTimes.length;
+            
+            // 繪製長條圖
+            const chartContainer = document.getElementById('chartContainer');
+            chartContainer.innerHTML = '';
+            
+            const maxTime = Math.max(...gameState.roundTimes);
+            
+            gameState.roundTimes.forEach((time, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                const height = (time / maxTime) * 200;
+                bar.style.height = `${height}px`;
+                
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = `第${index + 1}關`;
+                bar.appendChild(label);
+                
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = `${time}s`;
+                bar.appendChild(value);
+                
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        // 再玩一次
+        function playAgain() {
+            document.getElementById('resultScreen').style.display = 'none';
+            startGame();
+        }
+
+        // 返回開始畫面
+        function exitToStart() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
