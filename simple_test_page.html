@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Apps Script 連接測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 20px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .url-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Google Apps Script 連接測試</h1>
+        
+        <div class="test-section">
+            <h3>步驟1: 設置Apps Script URL</h3>
+            <p>請將您的Google Apps Script Web App URL貼在下方：</p>
+            <input type="text" id="scriptUrl" class="url-input" 
+                   placeholder="https://script.google.com/macros/s/您的SCRIPT_ID/exec">
+            <button onclick="saveUrl()">保存URL</button>
+            <div id="urlResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>步驟2: 測試GET請求</h3>
+            <p>測試基本的GET請求連接</p>
+            <button onclick="testGet()" id="testGetBtn">測試GET連接</button>
+            <div id="getResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>步驟3: 測試POST請求</h3>
+            <p>測試POST數據上傳功能</p>
+            <button onclick="testPost()" id="testPostBtn">測試POST連接</button>
+            <div id="postResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>步驟4: 模擬用戶數據上傳</h3>
+            <p>模擬實際的用戶資料上傳測試</p>
+            <button onclick="testUserData()" id="testUserBtn">測試用戶數據</button>
+            <div id="userResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 測試日誌</h3>
+            <pre id="testLog"></pre>
+            <button onclick="clearLog()">清除日誌</button>
+        </div>
+    </div>
+
+    <script>
+        let scriptUrl = '';
+        let testLog = '';
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog += `[${timestamp}] ${message}\n`;
+            document.getElementById('testLog').textContent = testLog;
+        }
+
+        function clearLog() {
+            testLog = '';
+            document.getElementById('testLog').textContent = '';
+        }
+
+        function saveUrl() {
+            const url = document.getElementById('scriptUrl').value.trim();
+            const resultDiv = document.getElementById('urlResult');
+            
+            if (!url) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '請輸入Apps Script URL';
+                return;
+            }
+            
+            if (!url.includes('script.google.com/macros/s/') || !url.includes('/exec')) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'URL格式不正確，應該類似：https://script.google.com/macros/s/YOUR_ID/exec';
+                return;
+            }
+            
+            scriptUrl = url;
+            localStorage.setItem('testScriptUrl', url);
+            resultDiv.className = 'result success';
+            resultDiv.textContent = 'URL已保存';
+            log(`URL已設置: ${url}`);
+        }
+
+        async function testGet() {
+            if (!scriptUrl) {
+                alert('請先設置Apps Script URL');
+                return;
+            }
+            
+            const button = document.getElementById('testGetBtn');
+            const resultDiv = document.getElementById('getResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試GET連接...';
+            
+            log('開始GET測試');
+            
+            try {
+                const testUrl = `${scriptUrl}?test=get&timestamp=${Date.now()}`;
+                log(`GET請求URL: ${testUrl}`);
+                
+                const response = await fetch(testUrl);
+                log(`GET響應狀態: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`GET響應數據: ${JSON.stringify(data)}`);
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>GET連接成功！</strong><br>
+                        回應時間: ${data.timestamp}<br>
+                        狀態: ${data.message}
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `GET請求失敗: ${data.error || '未知錯誤'}`;
+                }
+                
+            } catch (error) {
+                log(`GET錯誤: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>GET連接失敗</strong><br>
+                    錯誤: ${error.message}<br>
+                    <small>請檢查Apps Script部署設置</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試GET連接';
+            }
+        }
+
+        async function testPost() {
+            if (!scriptUrl) {
+                alert('請先設置Apps Script URL');
+                return;
+            }
+            
+            const button = document.getElementById('testPostBtn');
+            const resultDiv = document.getElementById('postResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試POST連接...';
+            
+            log('開始POST測試');
+            
+            try {
+                const testData = {
+                    test: 'post',
+                    timestamp: Date.now(),
+                    message: 'Hello from test'
+                };
+                
+                log(`POST請求數據: ${JSON.stringify(testData)}`);
+                
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                log(`POST響應狀態: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`POST響應數據: ${JSON.stringify(data)}`);
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>POST連接成功！</strong><br>
+                        回應時間: ${data.timestamp}<br>
+                        收到數據: ${JSON.stringify(data.receivedData)}
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `POST請求失敗: ${data.error || '未知錯誤'}`;
+                }
+                
+            } catch (error) {
+                log(`POST錯誤: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>POST連接失敗</strong><br>
+                    錯誤: ${error.message}<br>
+                    <small>請檢查Apps Script部署設置和CORS政策</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試POST連接';
+            }
+        }
+
+        async function testUserData() {
+            if (!scriptUrl) {
+                alert('請先設置Apps Script URL');
+                return;
+            }
+            
+            const button = document.getElementById('testUserBtn');
+            const resultDiv = document.getElementById('userResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試用戶數據上傳...';
+            
+            log('開始用戶數據測試');
+            
+            try {
+                const userData = {
+                    action: 'submitUserInfo',
+                    userId: 'test_user_' + Date.now(),
+                    name: '測試用戶',
+                    age: 25,
+                    gender: 'male',
+                    education: 'college'
+                };
+                
+                log(`用戶數據: ${JSON.stringify(userData)}`);
+                
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                log(`用戶數據響應狀態: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`用戶數據響應: ${JSON.stringify(data)}`);
+                
+                if (data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>用戶數據上傳成功！</strong><br>
+                        用戶ID: ${data.userId}<br>
+                        <small>請檢查Google Sheets中的"用戶資料"工作表</small>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `用戶數據上傳失敗: ${data.error || '未知錯誤'}`;
+                }
+                
+            } catch (error) {
+                log(`用戶數據錯誤: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>用戶數據上傳失敗</strong><br>
+                    錯誤: ${error.message}<br>
+                    <small>請檢查Apps Script函數和試算表權限</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試用戶數據';
+            }
+        }
+
+        // 頁面載入時恢復保存的URL
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('testScriptUrl');
+            if (savedUrl) {
+                document.getElementById('scriptUrl').value = savedUrl;
+                scriptUrl = savedUrl;
+                log('已載入保存的URL');
+            }
+            log('連接測試頁面已載入');
+        };
+    </script>
+</body>
+</html>
