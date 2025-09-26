@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>認知測驗系統最終測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 20px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .step-title {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .step-description {
+            color: #666;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 認知測驗系統最終測試</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">基於成功案例的簡化版本</p>
+
+        <div class="test-section">
+            <div class="step-title">步驟1: 測試基本GET連接</div>
+            <div class="step-description">驗證Apps Script部署是否正常</div>
+            <button onclick="testBasicConnection()" id="basicBtn">測試基本連接</button>
+            <div id="basicResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">步驟2: 測試POST數據提交</div>
+            <div class="step-description">測試最關鍵的數據提交功能</div>
+            <button onclick="testDataSubmission()" id="dataBtn">測試數據提交</button>
+            <div id="dataResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">步驟3: 測試用戶註冊流程</div>
+            <div class="step-description">模擬真實用戶註冊過程</div>
+            <button onclick="testUserRegistration()" id="userBtn">測試用戶註冊</button>
+            <div id="userResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">步驟4: 測試認知測驗完整流程</div>
+            <div class="step-description">端到端測試整個認知測驗數據流</div>
+            <button onclick="testCompleteFlow()" id="completeBtn">測試完整流程</button>
+            <div id="completeResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">步驟5: 測試數據查詢功能</div>
+            <div class="step-description">驗證數據是否正確保存並可查詢</div>
+            <button onclick="testDataRetrieval()" id="retrievalBtn">測試數據查詢</button>
+            <div id="retrievalResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="step-title">📋 完整測試日誌</div>
+            <button onclick="clearLog()">清除日誌</button>
+            <button onclick="downloadLog()">下載日誌</button>
+            <pre id="testLog"></pre>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #e8f5e9; border-radius: 10px;">
+            <h3>🎯 測試完成指標</h3>
+            <p>如果所有步驟都顯示「成功」，表示您的認知測驗系統已經完全可用！</p>
+        </div>
+    </div>
+
+    <script>
+        // 您的Apps Script Web App URL - 請替換為實際URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzoChEiF2N-qf8FOZQBJpFhNQy7eZmzSWEgHxGsAefIDPkoxoe6aKTxfo8JC3HYb0txZA/exec';
+        
+        let testLog = '';
+        let testData = {
+            userId: null,
+            recordId: null
+        };
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            testLog += `[${timestamp}] ${message}\n`;
+            document.getElementById('testLog').textContent = testLog;
+            console.log(`[測試] ${message}`);
+        }
+
+        function clearLog() {
+            testLog = '';
+            document.getElementById('testLog').textContent = '';
+        }
+
+        function downloadLog() {
+            if (!testLog) {
+                alert('沒有日誌可下載');
+                return;
+            }
+            
+            const blob = new Blob([testLog], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cognitive-test-log-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // 步驟1: 測試基本GET連接
+        async function testBasicConnection() {
+            const button = document.getElementById('basicBtn');
+            const resultDiv = document.getElementById('basicResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試基本連接...';
+            
+            log('=== 步驟1: 測試基本GET連接 ===');
+            
+            try {
+                const testUrl = `${SCRIPT_URL}?action=test&timestamp=${Date.now()}`;
+                log(`請求URL: ${testUrl}`);
+                
+                const response = await fetch(testUrl);
+                log(`響應狀態: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`響應數據: ${JSON.stringify(data)}`);
+                
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ 基本連接成功！</strong><br>
+                        版本: ${data.version}<br>
+                        時間戳: ${data.timestamp}
+                    `;
+                    log('✅ 步驟1成功');
+                } else {
+                    throw new Error(data.message || '未知錯誤');
+                }
+                
+            } catch (error) {
+                log(`❌ 步驟1失敗: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 基本連接失敗</strong><br>
+                    錯誤: ${error.message}
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試基本連接';
+            }
+        }
+
+        // 步驟2: 測試POST數據提交
+        async function testDataSubmission() {
+            const button = document.getElementById('dataBtn');
+            const resultDiv = document.getElementById('dataResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試POST數據提交...';
+            
+            log('=== 步驟2: 測試POST數據提交 ===');
+            
+            try {
+                const postData = {
+                    test: 'post_submission',
+                    timestamp: Date.now(),
+                    message: 'Hello from POST test'
+                };
+                
+                log(`POST數據: ${JSON.stringify(postData)}`);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(postData)
+                });
+                
+                log(`POST響應狀態: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`POST響應數據: ${JSON.stringify(data)}`);
+                
+                if (data.status === 'success') {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ POST數據提交成功！</strong><br>
+                        回應訊息: ${data.message}
+                    `;
+                    log('✅ 步驟2成功');
+                } else {
+                    throw new Error(data.message || 'POST提交失敗');
+                }
+                
+            } catch (error) {
+                log(`❌ 步驟2失敗: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ POST數據提交失敗</strong><br>
+                    錯誤: ${error.message}<br>
+                    <small>這是最關鍵的測試，如果失敗請檢查Apps Script部署設定</small>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試數據提交';
+            }
+        }
+
+        // 步驟3: 測試用戶註冊流程
+        async function testUserRegistration() {
+            const button = document.getElementById('userBtn');
+            const resultDiv = document.getElementById('userResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試用戶註冊...';
+            
+            log('=== 步驟3: 測試用戶註冊流程 ===');
+            
+            try {
+                const userData = {
+                    action: 'submitUserInfo',
+                    userId: 'test_user_' + Date.now(),
+                    name: '最終測試用戶',
+                    age: 25,
+                    gender: 'male',
+                    education: 'college'
+                };
+                
+                log(`用戶數據: ${JSON.stringify(userData)}`);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                log(`用戶註冊響應: ${JSON.stringify(data)}`);
+                
+                if (data.status === 'success') {
+                    testData.userId = data.userId;
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ 用戶註冊成功！</strong><br>
+                        用戶ID: ${data.userId}<br>
+                        <small>請檢查Google Sheets的"用戶資料"工作表</small>
+                    `;
+                    log('✅ 步驟3成功 - 用戶ID: ' + data.userId);
+                } else {
+                    throw new Error(data.message || '用戶註冊失敗');
+                }
+                
+            } catch (error) {
+                log(`❌ 步驟3失敗: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 用戶註冊失敗</strong><br>
+                    錯誤: ${error.message}
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試用戶註冊';
+            }
+        }
+
+        // 步驟4: 測試認知測驗完整流程
+        async function testCompleteFlow() {
+            const button = document.getElementById('completeBtn');
+            const resultDiv = document.getElementById('completeResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試完整認知測驗流程...';
+            
+            log('=== 步驟4: 測試認知測驗完整流程 ===');
+            
+            try {
+                // 如果沒有用戶ID，先創建一個
+                let userId = testData.userId;
+                if (!userId) {
+                    log('創建測試用戶...');
+                    const userResponse = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'submitUserInfo',
+                            userId: 'complete_test_' + Date.now(),
+                            name: '完整流程測試用戶',
+                            age: 30
+                        })
+                    });
+                    
+                    const userData = await userResponse.json();
+                    if (userData.status !== 'success') {
+                        throw new Error('創建用戶失敗: ' + userData.message);
+                    }
+                    userId = userData.userId;
+                    log('✅ 用戶創建成功: ' + userId);
+                }
+
+                // 提交測驗結果
+                log('提交測驗結果...');
+                const testResultData = {
+                    action: 'submitTestResult',
+                    userId: userId,
+                    startTime: Date.now() - 120000,
+                    totalRounds: 5,
+                    completedRounds: 4,
+                    correctRounds: 3,
+                    accuracy: 0.75,
+                    averageReactionTime: 9.5,
+                    totalTime: 240,
+                    difficultyStats: {
+                        '1Steps': {correct: 1, total: 1},
+                        '2Steps': {correct: 2, total: 2},
+                        '3Steps': {correct: 0, total: 1}
+                    },
+                    learningCurve: [0.6, 0.7, 0.75],
+                    errorTypes: ['wrong_direction'],
+                    browserInfo: 'Complete Flow Test Browser'
+                };
+
+                const testResponse = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testResultData)
+                });
+
+                const testResult = await testResponse.json();
+                if (testResult.status !== 'success') {
+                    throw new Error('測驗結果提交失敗: ' + testResult.message);
+                }
+                
+                testData.recordId = testResult.recordId;
+                log('✅ 測驗結果提交成功: ' + testResult.recordId);
+
+                // 提交關卡詳細記錄
+                log('提交關卡詳細記錄...');
+                const roundDetailData = {
+                    action: 'submitRoundDetail',
+                    userId: userId,
+                    recordId: testResult.recordId,
+                    roundNumber: 1,
+                    initialDirection: 'up',
+                    arrowSequence: ['right', 'left'],
+                    correctAnswer: 'up',
+                    userAnswer: 'up',
+                    isCorrect: true,
+                    reactionTime: 8.5,
+                    startTime: Date.now() - 60000,
+                    endTime: Date.now() - 51500,
+                    clickCount: 1,
+                    errorAttempts: 0
+                };
+
+                const detailResponse = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(roundDetailData)
+                });
+
+                const detailResult = await detailResponse.json();
+                if (detailResult.status !== 'success') {
+                    throw new Error('關卡記錄提交失敗: ' + detailResult.message);
+                }
+                log('✅ 關卡詳細記錄提交成功');
+
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>✅ 完整認知測驗流程測試成功！</strong><br>
+                    測試用戶ID: ${userId}<br>
+                    測驗記錄ID: ${testResult.recordId}<br>
+                    <small>請檢查Google Sheets中的所有工作表都有新記錄</small>
+                `;
+                log('🎉 步驟4成功 - 完整流程測試成功！');
+                
+            } catch (error) {
+                log(`❌ 步驟4失敗: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 完整認知測驗流程測試失敗</strong><br>
+                    錯誤: ${error.message}
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試完整流程';
+            }
+        }
+
+        // 步驟5: 測試數據查詢功能
+        async function testDataRetrieval() {
+            const button = document.getElementById('retrievalBtn');
+            const resultDiv = document.getElementById('retrievalResult');
+            
+            button.disabled = true;
+            button.textContent = '測試中...';
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '正在測試數據查詢...';
+            
+            log('=== 步驟5: 測試數據查詢功能 ===');
+            
+            try {
+                // 查詢所有用戶
+                log('查詢所有用戶...');
+                const usersResponse = await fetch(`${SCRIPT_URL}?action=getAllUsers&timestamp=${Date.now()}`);
+                
+                if (!usersResponse.ok) {
+                    throw new Error(`HTTP ${usersResponse.status}: ${usersResponse.statusText}`);
+                }
+                
+                const usersData = await usersResponse.json();
+                log(`用戶查詢響應: ${JSON.stringify(usersData)}`);
+                
+                if (usersData.status !== 'success') {
+                    throw new Error('用戶查詢失敗: ' + usersData.message);
+                }
+
+                const userCount = usersData.data ? usersData.data.length : 0;
+                log(`✅ 成功查詢到 ${userCount} 個用戶`);
+
+                // 如果有測試用戶ID，嘗試查詢分析數據
+                let analysisInfo = '';
+                if (testData.userId) {
+                    log('查詢分析數據...');
+                    const analysisResponse = await fetch(`${SCRIPT_URL}?action=getAnalysisData&userId=${testData.userId}`);
+                    const analysisData = await analysisResponse.json();
+                    
+                    if (analysisData.status === 'success') {
+                        log('✅ 分析數據查詢成功');
+                        analysisInfo = `<br>分析數據: 可正常查詢`;
+                    }
+                }
+
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>✅ 數據查詢功能正常！</strong><br>
+                    查詢到用戶數: ${userCount}${analysisInfo}<br>
+                    <small>系統數據讀取功能正常</small>
+                `;
+                log('✅ 步驟5成功');
+                
+            } catch (error) {
+                log(`❌ 步驟5失敗: ${error.message}`);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 數據查詢失敗</strong><br>
+                    錯誤: ${error.message}
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '測試數據查詢';
+            }
+        }
+
+        // 頁面載入時的初始化
+        window.onload = function() {
+            log('認知測驗系統最終測試頁面已載入');
+            log(`目標URL: ${SCRIPT_URL}`);
+            log('請按順序執行步驟1-5進行完整測試');
+        };
+    </script>
+</body>
+</html>
